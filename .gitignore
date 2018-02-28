@@ -1,0 +1,4 @@
+*.swp
+perf.data*
+gmon.out
+tags
