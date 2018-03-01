@@ -1,4 +1,4 @@
-//gcc -DDEPTH_PEELING -g -Wall -o depth_peeling ../x11_platform.c -lGL -lcairo -lX11-xcb -lX11 -lxcb -lxcb-sync -lxcb-randr -lm
+//gcc -DDEPTH_PEELING -O3 -g -Wall -o depth_peeling ../x11_platform.c -lGL -lcairo -lX11-xcb -lX11 -lxcb -lxcb-sync -lxcb-randr -lm
 /*
  * Copiright (C) 2018 Santiago León O.
  */

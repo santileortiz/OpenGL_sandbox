@@ -256,6 +256,7 @@ struct gui_state_t {
     int focused_layout_box;
     int num_layout_boxes;
     struct layout_box_t *layout_boxes;
+    struct css_box_t css_styles[CSS_NUM_STYLES];
 
     struct selection_t selection;
     struct behavior_t *behaviors;
@@ -266,8 +267,6 @@ struct gui_state_t {
 
     bool clipboard_ready;
     char *clipboard_str;
-
-    struct css_box_t css_styles[CSS_NUM_STYLES];
 };
 
 struct gui_state_t *global_gui_st;
@@ -364,29 +363,27 @@ void gui_destroy (struct gui_state_t *gui_st)
 // FONT BACKEND
 
 #ifdef __PANGO_H__
-#define new_pango_layout_from_style_fsw(cr,family,size,weight) \
-    new_pango_layout_from_style(cr, FONT_STYLE_FSW(family,size,weight))
-PangoLayout* new_pango_layout_from_style (cairo_t *cr, struct font_style_t font_style)
+PangoLayout* new_pango_layout_from_style (cairo_t *cr, struct font_style_t *font_style)
 {
     const char *font_family;
-    if (font_style.family == NULL) {
+    if (font_style->family == NULL) {
         font_family = global_gui_st->default_font_style.family;
     } else {
-        font_family = font_style.family;
+        font_family = font_style->family;
     }
 
     int font_size;
-    if (font_style.size == 0) {
+    if (font_style->size == 0) {
         font_size = global_gui_st->default_font_style.size;
     } else {
-        font_size = font_style.size;
+        font_size = font_style->size;
     }
 
     css_font_weight_t css_font_weight;
-    if (font_style.weight == CSS_FONT_WEIGHT_NONE) {
+    if (font_style->weight == CSS_FONT_WEIGHT_NONE) {
         css_font_weight = global_gui_st->default_font_style.weight;
     } else {
-        css_font_weight = font_style.weight;
+        css_font_weight = font_style->weight;
     }
 
     PangoWeight font_weight = PANGO_WEIGHT_NORMAL;
@@ -439,7 +436,7 @@ void render_text (cairo_t *cr, dvec2 pos, struct font_style_t *font_style,
                   char *str, size_t len, dvec4 *color, dvec4 *bg_color,
                   dvec2 *out_pos)
 {
-    PangoLayout *text_layout = new_pango_layout_from_style (cr, *font_style);
+    PangoLayout *text_layout = new_pango_layout_from_style (cr, font_style);
     pango_layout_set_text (text_layout, str, len);
 
     PangoRectangle logical;
@@ -530,17 +527,6 @@ void int_string_update_s (uint64_string_t *x, char* str)
 {
     x->i = strtoull (str, NULL, 10);
     str_set (&x->str, str);
-}
-
-// Calculates a ratio by which multiply box a so that it fits inside box b
-double best_fit_ratio (double a_width, double a_height,
-                       double b_width, double b_height)
-{
-    if (a_width/a_height < b_width/b_height) {
-        return b_height/a_height;
-    } else {
-        return b_width/a_width;
-    }
 }
 
 static inline
@@ -1726,13 +1712,6 @@ void hsv_to_rgb (dvec3 hsv, dvec3 *rgb)
             rgb->b = desc;
             break;
     }
-}
-
-void rgba_print (dvec4 rgba)
-{
-    printf ("rgba");
-    dvec4_print(&rgba);
-    printf ("\n");
 }
 
 // Automatic color palette:
